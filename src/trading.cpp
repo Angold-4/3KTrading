@@ -10,8 +10,9 @@ string Url::getUrl(string code) {
 }
 
 
-unordered_map<string, int> Parser::parse() {
-    unordered_map<string, int> ret = {};
+vector<pair<string, double>> Parser::parse() {
+    vector<pair<string, double>> ret = {};
+    // unordered_map<string, int> ret = {};
 
     string line;
     bool bflag = true; // flag for buy in 12 1
@@ -26,23 +27,26 @@ unordered_map<string, int> Parser::parse() {
 	if (line.substr(11, 4) == "null") continue; // null date
 
 	if (this->get_month(line) == 12 && bflag) {
-	    ret.insert(make_pair("12", 0));
+	    ret.push_back(make_pair("BS", 12));
 	    bflag = false;
 	    continue;
 	}
 
 	else if (this->get_month(line) == 2 && !bflag) {
-	    ret.insert(make_pair("2", 0));
+	    ret.push_back(make_pair("BS", 2));
+	    bflag = true;
 	    continue;
 	}
 
 	else if (this->get_month(line) == 3 && sflag) {
-	    ret.insert(make_pair("3", 0));
+	    ret.push_back(make_pair("BS", 3));
+	    sflag = false;
 	    continue;
 	}
 
 	else if (this->get_month(line) == 6 && !sflag) {
-	    ret.insert(make_pair("6", 0));
+	    ret.push_back(make_pair("BS", 6));
+	    sflag = true;
 	    continue;
 	}
 
@@ -50,14 +54,21 @@ unordered_map<string, int> Parser::parse() {
 	string date = this->get_date(line);
 	double avgvalue = this->ohlcavg(line);
 	// cout << "date: " << date << ", " " avg value: " << avgvalue << endl; // debug only
-
-	ret[date] = avgvalue;
+	ret.push_back(make_pair(date, avgvalue));
     }
     return ret;
 }
 
+// Main sma algorithm
+void Trading::sma(int index) {
+    int sinterval = 5;
+    int linterval = 40;
+    
+    vector<pair<string, double>> smas = this->calcsma(sinterval); // small sma
+    vector<pair<string, double>> smal = this->calcsma(linterval); // large sma
 
-
+    if (smas.size() != smal.size()) cout << "Invalid, Comparison" << endl;
+}
 
 
 // Entry
@@ -71,8 +82,8 @@ int main() {
     string csvdata = CObj->getData();
 
     Parser* ParserObj = new Parser(csvdata);
-    unordered_map<string, int> datevalue = ParserObj->parse();
+    vector<pair<string, double>> datevalue = ParserObj->parse();
 
-
-
+    Trading* TradeObj = new Trading(datevalue);
+    TradeObj->sma(1);
 }

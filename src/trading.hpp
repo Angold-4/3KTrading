@@ -94,7 +94,7 @@ public:
      * for each day, fill the string and avg price (sum/4) 
      * and then return them
      */
-    unordered_map<string, int> parse();
+    vector<pair<string, double>> parse();
     
 
 private:
@@ -136,20 +136,53 @@ private:
 // Trading is the class to simulate all kinds of trades
 class Trading {
 public:
-    Trading (unordered_map<string, double> datevalue) : yearval(datevalue) {}
+    Trading (vector<pair<string, double>> datevalue) : yearval(datevalue) {
+	this->daymap = {};
+	for (auto p : this->yearval) this->daymap.insert(p);
+    }
     
     // #1 SMA trade simulation
-    void sma (int index);
+    void sma(int index);
+
 
 
 private:
-    unordered_map<string, double> yearval;
-
+    vector<pair<string, double>>  yearval;
+    unordered_map<string, double> daymap;
     /*
      * Trading::calcsma
      *
      * calculate sma with this interval
      */
-    unordered_map<string, double> calcsma(int interval);
+
+public:
+    vector<pair<string, double>> calcsma(int interval) {
+	vector<pair<string, double>> ret = {};
+	bool start = false;
+	double suma = 0; // sum of prev interval days
+	double sma = 0;
+
+	// interval
+	for (int i = 0; i < interval; i++) {
+	    suma += this->yearval[i].second;
+	}
+	sma = suma / interval; // currenct interval
+	
+	for (vector<pair<string, double>>::iterator it = this->yearval.begin()+interval+1; it < this->yearval.end(); it++) {
+	    pair<string, double> dayval = *it;
+	    if (it->first == "BS") {
+		start = true;
+		ret.push_back(*it);
+		continue;
+	    }
+	    suma -= (it - interval)->second;
+	    suma += it->second;
+	    if (start) {
+		sma = suma / interval;
+		ret.push_back(make_pair(it->first, sma));
+	    }
+	}
+	return ret;
+    }
 
 };
