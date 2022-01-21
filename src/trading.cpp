@@ -106,7 +106,7 @@ int main() {
     string pattenstart = "01/10/20";
     string pattenend = "01/06/20";
 
-    unordered_map<int, string> yeardata = {};
+    unordered_map<int, vector<pair<string, double>>> yeardata = {};
 
     for (int i = 0; i < 22; i++) {
 	// for each year
@@ -133,7 +133,9 @@ int main() {
 
 	CurlObj* CObj = new CurlObj(url);
 	string csvdata = CObj->getData();
-	yeardata[i] = csvdata;
+	Parser* ParserObj = new Parser(csvdata);
+	vector<pair<string, double>> datevalue = ParserObj->parse();
+	yeardata[i] = datevalue;
     }
 
 
@@ -145,10 +147,7 @@ int main() {
 	    // for each s, l
 	    double totaldiff = 0; // fixed s, l. totaldiff
 	    for (int i = 0; i < 22; i++) {
-		string csvdata = yeardata[i];
-
-		Parser* ParserObj = new Parser(csvdata);
-		vector<pair<string, double>> datevalue = ParserObj->parse();
+		vector<pair<string, double>> datevalue = yeardata[i];
 
 		Trading* TradeObj = new Trading(datevalue);
 		totaldiff += TradeObj->sma(i, s, l);
