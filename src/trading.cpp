@@ -61,8 +61,8 @@ vector<pair<string, double>> Parser::parse() {
 
 // Main sma algorithm
 double Trading::sma(int index, int sinterval, int linterval) {
-    vector<pair<string, double>> smas = this->calcsma(sinterval); // small sma
-    vector<pair<string, double>> smal = this->calcsma(linterval); // large sma
+    vector<pair<string, double>> smas = this->caldoublesma(sinterval); // small sma
+    vector<pair<string, double>> smal = this->caldoublesma(linterval); // large sma
 
     if (smas.size() != smal.size()) cout << "Invalid sma calculation, please check your interval" << endl; // detect error
 

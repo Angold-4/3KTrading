@@ -162,7 +162,6 @@ private:
      * calculate sma with this interval
      */
 
-public:
     vector<pair<string, double>> caldoublesma(int interval) {
 	vector<pair<string, double>> ret = {};
 	bool start = false;
