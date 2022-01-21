@@ -96,8 +96,8 @@ double Trading::sma(int index, int sinterval, int linterval) {
     this->totaldiff += this->maxprice - diff;
     return this->totaldiff;
 
-    cout << index << ": diff " << diff << " date: " << diffday << " value: " << this->daymap[diffday] << " maxvalue: " << this->maxprice 
-	<< " maxdate: " << this->maxdate << endl;
+    // cout << index << ": diff " << diff << " date: " << diffday << " value: " << this->daymap[diffday] << " maxvalue: " << this->maxprice 
+	// << " maxdate: " << this->maxdate << endl;
 }
 
 
@@ -110,7 +110,7 @@ int main() {
     string mins = "invalid";
     string minl = "invalid";
     for (int s = 5; s < 11; s++) {
-	// for (int l = 30; l <= 40; l++) {
+	for (int l = 30; l <= 40; l++) {
 	    // for each s, l
 	    double totaldiff = 0; // fixed s, l. totaldiff
 	    for (int i = 0; i < 22; i++) {
@@ -143,16 +143,16 @@ int main() {
 		vector<pair<string, double>> datevalue = ParserObj->parse();
 
 		Trading* TradeObj = new Trading(datevalue);
-		totaldiff += TradeObj->sma(i, s, 20);
+		totaldiff += TradeObj->sma(i, s, l);
 	    }
-	    cout << totaldiff << " " << s << " " << 20 << endl;
+	    cout << totaldiff << " " << s << " " << l << endl;
 	    // finish this 22 years
 	    if (totaldiff < mindiff) {
 		mindiff = totaldiff;
 		mins = s;
-		minl = 20;
+		minl = l;
 	    }
-	// }
+	}
     }
     cout << "When sinterval = " << mins << ", linterval = " << minl << ", we can find the most accurate value: " << mindiff << endl;
 }
