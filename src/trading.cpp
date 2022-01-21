@@ -109,8 +109,9 @@ int main() {
     double mindiff = INT_MAX;
     string mins = "invalid";
     string minl = "invalid";
-    for (int s = 5; s < 11; s++) {
-	for (int l = 30; l <= 40; l++) {
+    // for (int s = 5; s < 11; s++) {
+    int s = 5;
+	for (int l = 31; l <= 40; l++) {
 	    // for each s, l
 	    double totaldiff = 0; // fixed s, l. totaldiff
 	    for (int i = 0; i < 22; i++) {
@@ -152,7 +153,7 @@ int main() {
 		mins = s;
 		minl = l;
 	    }
-	}
+	// }
     }
     cout << "When sinterval = " << mins << ", linterval = " << minl << ", we can find the most accurate value: " << mindiff << endl;
 }
