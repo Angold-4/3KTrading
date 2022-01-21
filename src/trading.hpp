@@ -138,17 +138,24 @@ class Trading {
 public:
     Trading (vector<pair<string, double>> datevalue) : yearval(datevalue) {
 	this->daymap = {};
+	this->maxprice = 0;
+	this->maxdate = "";
 	for (auto p : this->yearval) this->daymap.insert(p);
+	this->totaldiff = 0;
     }
     
     // #1 SMA trade simulation
-    void sma(int index);
+    double sma(int index, int sinterval, int linterval);
 
 
 
 private:
     vector<pair<string, double>>  yearval;
     unordered_map<string, double> daymap;
+    double maxprice;
+    string maxdate;
+
+    double totaldiff; // total diff value of this year
     /*
      * Trading::calcsma
      *
@@ -156,7 +163,7 @@ private:
      */
 
 public:
-    vector<pair<string, double>> calcsma(int interval) {
+    vector<pair<string, double>> caldoublesma(int interval) {
 	vector<pair<string, double>> ret = {};
 	bool start = false;
 	double suma = 0; // sum of prev interval days
@@ -175,9 +182,16 @@ public:
 		ret.push_back(*it);
 		continue;
 	    }
-	    suma -= (it - interval)->second;
+	    if ((it - interval)->first == "BS")  {
+		suma -= (it - interval - 1)->second;
+	    } else { suma -= (it - interval)->second; }
 	    suma += it->second;
 	    if (start) {
+		if (it->second > this->maxprice) {
+		    // get maximum value
+		    this->maxprice = it->second;
+		    this->maxdate = it->first;
+		}
 		sma = suma / interval;
 		ret.push_back(make_pair(it->first, sma));
 	    }
