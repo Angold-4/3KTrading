@@ -93,9 +93,9 @@ double Trading::sma(int index, int sinterval, int linterval) {
 	}
     }
 
-    this->totaldiff += this->maxprice - diff;
-    return this->totaldiff;
+    this->totaldiff = this->maxprice - this->daymap[diffday];
 
+    return this->totaldiff;
     // cout << index << ": diff " << diff << " date: " << diffday << " value: " << this->daymap[diffday] << " maxvalue: " << this->maxprice 
 	// << " maxdate: " << this->maxdate << endl;
 }
@@ -106,39 +106,46 @@ int main() {
     string pattenstart = "01/10/20";
     string pattenend = "01/06/20";
 
+    unordered_map<int, string> yeardata = {};
+
+    for (int i = 0; i < 22; i++) {
+	// for each year
+	string ftail = "";
+	string etail = "";
+	if (i < 10) {
+	    ftail += '0';
+	    ftail += to_string(i);
+	} else {
+	    ftail = to_string(i);
+	}
+
+	if (i < 9) {
+	    etail += '0';
+	    etail += to_string(i+1);
+	} else {
+	    etail += to_string(i+1);
+	}
+	string start = pattenstart + ftail;
+	string end   = pattenend + etail;
+	cout << start << " " << end << endl;
+	Url* UrlObj = new Url(start, end);
+	string url = UrlObj->getUrl("JPY=X");
+
+	CurlObj* CObj = new CurlObj(url);
+	string csvdata = CObj->getData();
+	yeardata[i] = csvdata;
+    }
+
+
     double mindiff = INT_MAX;
-    string mins = "invalid";
-    string minl = "invalid";
-    // for (int s = 5; s < 11; s++) {
-    int s = 5;
-	for (int l = 31; l <= 40; l++) {
+    int mins = 0;
+    int minl = 0;
+    for (int s = 3; s <= 11; s++) {
+	for (int l = 10; l <= 41; l++) {
 	    // for each s, l
 	    double totaldiff = 0; // fixed s, l. totaldiff
 	    for (int i = 0; i < 22; i++) {
-		// for each year
-		string ftail = "";
-		string etail = "";
-		if (i < 10) {
-		    ftail += '0';
-		    ftail += to_string(i);
-		} else {
-		    ftail = to_string(i);
-		}
-
-		if (i < 9) {
-		    etail += '0';
-		    etail += to_string(i+1);
-		} else {
-		    etail += to_string(i+1);
-		}
-		string start = pattenstart + ftail;
-		string end   = pattenend + etail;
-		cout << start << " " << end << endl;
-		Url* UrlObj = new Url(start, end);
-		string url = UrlObj->getUrl("JPY=X");
-
-		CurlObj* CObj = new CurlObj(url);
-		string csvdata = CObj->getData();
+		string csvdata = yeardata[i];
 
 		Parser* ParserObj = new Parser(csvdata);
 		vector<pair<string, double>> datevalue = ParserObj->parse();
@@ -153,7 +160,7 @@ int main() {
 		mins = s;
 		minl = l;
 	    }
-	// }
+	}
     }
     cout << "When sinterval = " << mins << ", linterval = " << minl << ", we can find the most accurate value: " << mindiff << endl;
 }
