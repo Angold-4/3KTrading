@@ -140,29 +140,37 @@ public:
 	this->daymap = {};
 	this->maxprice = 0;
 	this->maxdate = "";
+	this->mindate = "";
+	this->minprice = INT_MAX;
 	for (auto p : this->yearval) this->daymap.insert(p);
 	this->totaldiff = 0;
+	this->totallowdiff = 0;
     }
     
     // #1 SMA trade simulation
     double sma(int index, int sinterval, int linterval);
 
+    // #2 find the lowest prices near Apr, May, June
+    double smalowest(int index, int sinterval, int linterval);
 
 
 private:
     vector<pair<string, double>>  yearval;
     unordered_map<string, double> daymap;
     double maxprice;
+    double minprice;
+    string mindate;
     string maxdate;
 
     double totaldiff; // total diff value of this year
+    double totallowdiff;
+
     /*
      * Trading::calcsma
      *
      * calculate sma with this interval
      */
-
-    vector<pair<string, double>> caldoublesma(int interval) {
+    vector<pair<string, double>> calc12sma(int interval) {
 	vector<pair<string, double>> ret = {};
 	bool start = false;
 	double suma = 0; // sum of prev interval days
@@ -198,4 +206,40 @@ private:
 	return ret;
     }
 
+
+    vector<pair<string, double>> calc3sma(int interval) {
+	vector<pair<string, double>> ret = {};
+	bool start = false;
+	double suma = 0; // sum of prev interval days
+	double sma = 0;
+
+	// interval
+	for (int i = 0; i < interval; i++) {
+	    suma += this->yearval[i].second;
+	}
+	sma = suma / interval; // currenct interval
+	
+	for (vector<pair<string, double>>::iterator it = this->yearval.begin()+interval+1; it < this->yearval.end(); it++) {
+	    pair<string, double> dayval = *it;
+	    if (it->first == "BS3") {
+		start = true;
+		ret.push_back(*it);
+		continue;
+	    }
+	    if ((it - interval)->first == "BS" | (it - interval)->first == "BS3")  {
+		suma -= (it - interval - 1)->second;
+	    } else { suma -= (it - interval)->second; }
+	    suma += it->second;
+	    if (start) {
+		if (it->second < this->minprice) {
+		    // get maximum value
+		    this->minprice = it->second;
+		    this->mindate = it->first;
+		}
+		sma = suma / interval;
+		ret.push_back(make_pair(it->first, sma));
+	    }
+	}
+	return ret;
+    }
 };
